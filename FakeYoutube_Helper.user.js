@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Fake-Youtube Helper
+// @name:zh-CN   假油管的助手
 // @namespace    https://greasyfork.org/users/159546
-// @version      1.2
+// @version      1.2.1
 // @description  Fix so much problem. Caution: This script is not for really Youtube.
+// @description:zh-CN 修复了油管的很多问题。注意：这个脚本不是给真的油管使用。
 // @author       LEORChn
-// @match        http*://198.13.56.205:8700/*
+// @match        http*://207.246.125.137:8700/*
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
@@ -41,7 +43,7 @@ function fix_watch_page_link(){
     for(var i=0,len=4,h=ip.split(':')[0].split('.');i<len;i++) hexip+=(h[i]>15?'':'0')+parseInt(h[i],10).toString(16);
     for(var a=ft('a'),i=0,len=a.length;i<len;i++)
         if(a[i].href.indexOf(ip)>0)
-            a[i].href=a[i].href.replace(ip,'198.13.56.205:8700')+'&pid='+hexip;
+            a[i].href=a[i].href.replace(vip,'')+'&pid='+hexip;
 }
 function fix_img(){
     for(var a=ft('img'),i=0,len=a.length;i<len;i++){
@@ -53,7 +55,7 @@ function fix_player(){
     var a,vid;
     switch(fun){
         case'user':a=fv('upsell-video');if(a==null)return;vid=a.getAttribute('data-video-id');break;
-        case'watch':a=fv('player-api');vid=gvid();break;
+        case'watch':a=fix_fullpage();vid=gvid();break;
     }
     a.innerHTML='<video id="leorvp" src="'+vip+'/live?v='+vid+'" style="width:100%;height:100%" controls="controls" autoPlay>Failed</video>';
     a.className=a.className.replace('off-screen-target','');
@@ -62,6 +64,14 @@ function fix_player(){
     a=fv('player-unavailable'); a.className=a.className.replace('player-height','');
     vp=a=fv('leorvp');
     a.onclick=function(){if(a.paused)a.play();else a.pause();};
+}
+function fix_fullpage(){
+    var w=ct('div'),o=fv('player-api'),l=absLeft(o),t=absTop(o)-100;
+    w.id='playerbox';
+    w.className='player-width player-height';
+    w.style.cssText='position:absolute;left:'+l+'px;top:'+t+'px;z-index:5222';
+    ft('body')[0].appendChild(w);
+    return w;
 }
 function initPlayServer(){
     for(var a=ft('a'),i=0,len=a.length,fstr=0;i<len;i++){
@@ -87,6 +97,8 @@ function fc(cname){return document.getElementsByClassName(cname);}
 function ct(tag,to){to=document.createElement(tag);return to;}
 function tip(s){console.log(s);}
 function doEvents(){console.log('doEvents');}
+function absTop(e){var l=0;while(e){l+=e.offsetTop;e=e.parentElement;}return l;}
+function absLeft(e){var l=0;while(e){l+=e.offsetLeft;e=e.parentElement;}return l;}
 //----- -----
 var vp,ctl;
 function addfeature(){
@@ -151,7 +163,17 @@ function fullPageEntry(){
     n.innerText='Fullpage';
     n.style.cssText='float:right;margin-left:5px';
     ctl.appendChild(n);
-    n.onclick=function(){document.documentElement.webkitRequestFullscreen();/*alert('todo: request fill the player whole the page');*/};
+    n.onclick=function(){
+        var pb=fv('playerbox'),o=fv('player-api'),l=absLeft(o),t=absTop(o)-100;
+        pb.style.cssText=pb.style.cssText?'':'position:absolute;left:'+l+'px;top:'+t+'px;z-index:5222';
+        pb.className=pb.style.cssText?'player-width player-height':'fullpagescreen';
+    };
+    vp.ondblclick=n.onclick;
+    n=ct('style');
+    n.type='text/css';
+    n.innerHTML='.fullpagescreen{background-color:#404040;position:absolute;width:100%;height:100%;top:0px;left:0px;z-index:5222}';
+    //alert(n.outerHTML);
+    ft('body')[0].appendChild(n);
 }
 function funny(){
     //for(var i=0,b=fc('yt-uix-button-content'),len=b.length;i<len;i++) if(b[i]&&!b[i].parentNode.href&&isNaN(b[i].innerText)) funny_1_do(b[i]);
