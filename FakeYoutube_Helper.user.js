@@ -2,7 +2,7 @@
 // @name         Fake-Youtube Helper
 // @name:zh-CN   假油管的助手
 // @namespace    https://greasyfork.org/users/159546
-// @version      1.2.1
+// @version      1.3
 // @description  Fix so much problem. Caution: This script is not for really Youtube.
 // @description:zh-CN 修复了油管的很多问题。注意：这个脚本不是给真的油管使用。
 // @author       LEORChn
@@ -32,6 +32,7 @@ function start(){
             fix_player();
         case'results':
         case'channel':
+        case'':
             fix_watch_page_link();
             fix_img();
             break;
@@ -57,7 +58,9 @@ function fix_player(){
         case'user':a=fv('upsell-video');if(a==null)return;vid=a.getAttribute('data-video-id');break;
         case'watch':a=fix_fullpage();vid=gvid();break;
     }
-    a.innerHTML='<video id="leorvp" src="'+vip+'/live?v='+vid+'" style="width:100%;height:100%" controls="controls" autoPlay>Failed</video>';
+    vp=ct('video');
+    a.appendChild(vp);
+    vp.outerHTML='<video id="leorvp" src="'+vip+'/live?v='+vid+'" style="width:100%;height:100%" controls="controls" autoPlay>Failed</video>';
     a.className=a.className.replace('off-screen-target','');
     for(var i=0,b=ft('button'),len=b.length;i<len;i++) if(b[i].parentElement.id=='watch7-player-age-gate-content'){b[i].remove();break;}
     fc('meh')[0].className='';
@@ -66,11 +69,16 @@ function fix_player(){
     a.onclick=function(){if(a.paused)a.play();else a.pause();};
 }
 function fix_fullpage(){
-    var w=ct('div'),o=fv('player-api'),l=absLeft(o),t=absTop(o)-100;
+    var w=fv('playerbox'),o=fv('placeholder-player'),l=absLeft(o),t=absTop(o)-100;
+    if(w)return o;
+    w=ct('div');
     w.id='playerbox';
     w.className='player-width player-height';
     w.style.cssText='position:absolute;left:'+l+'px;top:'+t+'px;z-index:5222';
     ft('body')[0].appendChild(w);
+    var limtip=fv('player-unavailable');
+    limtip.style.color='#ffffff';limtip.style.backgroundColor='transparent';
+    w.appendChild(limtip);
     return w;
 }
 function initPlayServer(){
@@ -164,7 +172,7 @@ function fullPageEntry(){
     n.style.cssText='float:right;margin-left:5px';
     ctl.appendChild(n);
     n.onclick=function(){
-        var pb=fv('playerbox'),o=fv('player-api'),l=absLeft(o),t=absTop(o)-100;
+        var pb=fv('playerbox'),o=fix_fullpage(),l=absLeft(o),t=absTop(o)-100;
         pb.style.cssText=pb.style.cssText?'':'position:absolute;left:'+l+'px;top:'+t+'px;z-index:5222';
         pb.className=pb.style.cssText?'player-width player-height':'fullpagescreen';
     };
