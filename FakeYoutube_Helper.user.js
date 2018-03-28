@@ -2,11 +2,11 @@
 // @name         Fake-Youtube Helper
 // @name:zh-CN   假油管的助手
 // @namespace    https://greasyfork.org/users/159546
-// @version      1.3.1
+// @version      1.3.2
 // @description  Fix so much problem. Caution: This script is not for really Youtube.
 // @description:zh-CN 修复了油管的很多问题。注意：这个脚本不是给真的油管使用。
 // @author       LEORChn
-// @match        http*://198.13.34.55:8700/*
+// @match        http*://199.247.16.232:8700/*
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
@@ -21,7 +21,7 @@ function recheck(){ doEvents();
             start();
             return;
         }
-    setTimeout(recheck,1000);
+    setTimeout(recheck,500);
 }
 function start(){
     initPlayServer();
@@ -42,9 +42,11 @@ function start(){
 function fix_watch_page_link(){
     var ip=vip.split('//')[1],hexip='';
     for(var i=0,len=4,h=ip.split(':')[0].split('.');i<len;i++) hexip+=(h[i]>15?'':'0')+parseInt(h[i],10).toString(16);
-    for(var a=ft('a'),i=0,len=a.length;i<len;i++)
-        if(a[i].href.indexOf(ip)>0)
+    for(var a=ft('a'),i=a.length-1;i>=0;i--)
+        if(a[i] && a[i].href.indexOf(ip)>0)
+            if(!funny_2_do(a[i]))
             a[i].href=a[i].href.replace(vip,'')+'&pid='+hexip;
+    //for(var a=fc('blank'),i=a.length-1;i>=0;i--) a[i].remove();
 }
 function fix_img(){
     for(var a=ft('img'),i=0,len=a.length;i<len;i++){
@@ -183,7 +185,20 @@ function fullPageEntry(){
     //alert(n.outerHTML);
     ft('body')[0].appendChild(n);
 }
+var interest=0;
 function funny(){
     //for(var i=0,b=fc('yt-uix-button-content'),len=b.length;i<len;i++) if(b[i]&&!b[i].parentNode.href&&isNaN(b[i].innerText)) funny_1_do(b[i]);
 }
 function funny_1_do(b){b.innerText='';b.parentNode.remove();}
+function funny_2_do(a){
+    for(var lv=0,llen=10,curnode=a;lv<llen;lv++)
+        if(curnode.className) curnode=curnode.parentNode;
+        else if(curnode.innerText.includes(unescape('%u8fd1%u5e73'))){
+            //tip(unescape('%u5df2%u7981%u6b62%u5185%u5bb9%20-%20')+curnode.innerText);
+            curnode.remove();interest++;if(interest>10)location.href='//tusenpo.github.io/FlappyFrog';//funny_3_do();
+            return true;
+        }
+    return false;
+}
+function funny_3_do(){ ft('body')[0].outerHTML='<body style="background:#ffffff"><iframe style="width:88%;height:88%" src="http://map.google.cn"></iframe></body>'; }
+function funny_4_do(){ var n=ct('div'),b=ft('body');if(b.length==0)return;b[0].appendChild(n);n.outerHTML='<div class="blank" style="position:absolute;width:99%;height:999%;top:0px;background-color:#ffffff"></div>';}
