@@ -2,11 +2,11 @@
 // @name         Fake-Youtube Helper
 // @name:zh-CN   假油管的助手
 // @namespace    https://greasyfork.org/users/159546
-// @version      1.3
+// @version      1.3.1
 // @description  Fix so much problem. Caution: This script is not for really Youtube.
 // @description:zh-CN 修复了油管的很多问题。注意：这个脚本不是给真的油管使用。
 // @author       LEORChn
-// @match        http*://207.246.125.137:8700/*
+// @match        http*://198.13.34.55:8700/*
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
