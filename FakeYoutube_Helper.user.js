@@ -2,11 +2,11 @@
 // @name         Fake-Youtube Helper
 // @name:zh-CN   假油管的助手
 // @namespace    https://greasyfork.org/users/159546
-// @version      1.3.2
+// @version      1.3.3
 // @description  Fix so much problem. Caution: This script is not for really Youtube.
 // @description:zh-CN 修复了油管的很多问题。注意：这个脚本不是给真的油管使用。
 // @author       LEORChn
-// @match        http*://199.247.16.232:8700/*
+// @include      *:8700/*
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
@@ -27,11 +27,12 @@ function start(){
     initPlayServer();
     fun=gfun(location.href);
     switch(fun){
-        case'user':
         case'watch':
+            auto_expand();
+        case'user':
+        case'channel':
             fix_player();
         case'results':
-        case'channel':
         case'':
             fix_watch_page_link();
             fix_img();
@@ -57,21 +58,20 @@ function fix_img(){
 function fix_player(){
     var a,vid;
     switch(fun){
-        case'user':a=fv('upsell-video');if(a==null)return;vid=a.getAttribute('data-video-id');break;
-        case'watch':a=fix_fullpage();vid=gvid();break;
+        case'user':case'channel':a=fv('upsell-video');if(!a)return;vid=a.getAttribute('data-video-id');break;
+        case'watch':a=fix_fullpage();vid=gvid(); fc('meh')[0].className=''; break;
     }
     vp=ct('video');
     a.appendChild(vp);
     vp.outerHTML='<video id="leorvp" src="'+vip+'/live?v='+vid+'" style="width:100%;height:100%" controls="controls" autoPlay>Failed</video>';
     a.className=a.className.replace('off-screen-target','');
     for(var i=0,b=ft('button'),len=b.length;i<len;i++) if(b[i].parentElement.id=='watch7-player-age-gate-content'){b[i].remove();break;}
-    fc('meh')[0].className='';
     a=fv('player-unavailable'); a.className=a.className.replace('player-height','');
     vp=a=fv('leorvp');
     a.onclick=function(){if(a.paused)a.play();else a.pause();};
 }
 function fix_fullpage(){
-    var w=fv('playerbox'),o=fv('placeholder-player'),l=absLeft(o),t=absTop(o)-100;
+    var w=fv('playerbox'),o=fv('theater-background'),l=absLeft(o),t=absTop(o);
     if(w)return o;
     w=ct('div');
     w.id='playerbox';
@@ -82,6 +82,10 @@ function fix_fullpage(){
     limtip.style.color='#ffffff';limtip.style.backgroundColor='transparent';
     w.appendChild(limtip);
     return w;
+}
+function auto_expand(){
+    var vdetail=fv('action-panel-details');
+    vdetail.className=vdetail.className.replace('yt-uix-expander-collapsed','');
 }
 function initPlayServer(){
     for(var a=ft('a'),i=0,len=a.length,fstr=0;i<len;i++){
@@ -107,8 +111,8 @@ function fc(cname){return document.getElementsByClassName(cname);}
 function ct(tag,to){to=document.createElement(tag);return to;}
 function tip(s){console.log(s);}
 function doEvents(){console.log('doEvents');}
-function absTop(e){var l=0;while(e){l+=e.offsetTop;e=e.parentElement;}return l;}
-function absLeft(e){var l=0;while(e){l+=e.offsetLeft;e=e.parentElement;}return l;}
+function absTop(e,l){l=l?l:0;return e.offsetParent==null?l:absTop(e.offsetParent,l+e.offsetTop);}
+function absLeft(e,l){l=l?l:0;return e.offsetParent==null?l:absLeft(e.offsetParent,l+e.offsetLeft);}
 //----- -----
 var vp,ctl;
 function addfeature(){
@@ -127,7 +131,7 @@ function initPlayerControl(){
 }
 function vshareEntry(){
     var n=ct('a');
-    n.onclick=function(){prompt('Press Ctrl+C','http://youtu.be/'+gvid());};
+    n.onclick=fc('action-panel-trigger-share')[0].onclick=function(){prompt('Press Ctrl+C','http://youtu.be/'+gvid());};
     n.innerText='share, ';
     ctl.appendChild(n);
     n=ct('a');
@@ -173,16 +177,20 @@ function fullPageEntry(){
     n.innerText='Fullpage';
     n.style.cssText='float:right;margin-left:5px';
     ctl.appendChild(n);
-    n.onclick=function(){
-        var pb=fv('playerbox'),o=fix_fullpage(),l=absLeft(o),t=absTop(o)-100;
+    vp.ondblclick=n.onclick=function(){
+        var pb=fv('playerbox'),o=fix_fullpage(),l=absLeft(o),t=absTop(o);
         pb.style.cssText=pb.style.cssText?'':'position:absolute;left:'+l+'px;top:'+t+'px;z-index:5222';
         pb.className=pb.style.cssText?'player-width player-height':'fullpagescreen';
+        //pb.offsetHeight=pb.offsetWidth*0.5625+'px';
+        scrollTo(0,0);
     };
-    vp.ondblclick=n.onclick;
     n=ct('style');
     n.type='text/css';
     n.innerHTML='.fullpagescreen{background-color:#404040;position:absolute;width:100%;height:100%;top:0px;left:0px;z-index:5222}';
-    //alert(n.outerHTML);
+    fv('yt-masthead-container').style.background=fv('search-btn').style.background=fv('masthead-search-terms').style.background='transparent';
+    fv('masthead-search-term').style.color='#888';
+    var yinsiquantixing=fc('yt-consent-banner');
+    if(yinsiquantixing[0])yinsiquantixing[0].style.background='transparent';
     ft('body')[0].appendChild(n);
 }
 var interest=0;
@@ -191,11 +199,12 @@ function funny(){
 }
 function funny_1_do(b){b.innerText='';b.parentNode.remove();}
 function funny_2_do(a){
+    var kwg=['%u8fd1%u5e73','%u6cfd%u6c11','%u6fa4%u6c11'];
     for(var lv=0,llen=10,curnode=a;lv<llen;lv++)
-        if(curnode.className) curnode=curnode.parentNode;
-        else if(curnode.innerText.includes(unescape('%u8fd1%u5e73'))){
-            //tip(unescape('%u5df2%u7981%u6b62%u5185%u5bb9%20-%20')+curnode.innerText);
-            curnode.remove();interest++;if(interest>10)location.href='//tusenpo.github.io/FlappyFrog';//funny_3_do();
+        if(curnode.nodeName.toUpperCase()!="LI") curnode=curnode.parentNode;
+        else for(var k in kwg)if(curnode.innerText.includes(unescape(kwg[k]))){
+            tip(curnode);
+            curnode.remove();interest++;if(interest>9)location.href='//tusenpo.github.io/FlappyFrog';//funny_3_do();
             return true;
         }
     return false;
