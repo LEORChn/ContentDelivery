@@ -2,11 +2,13 @@
 // @name         Fake-Youtube Helper
 // @name:zh-CN   假油管的助手
 // @namespace    https://greasyfork.org/users/159546
-// @version      1.3.3
+// @version      1.3.4
 // @description  Fix so much problem. Caution: This script is not for really Youtube.
 // @description:zh-CN 修复了油管的很多问题。注意：这个脚本不是给真的油管使用。
 // @author       LEORChn
 // @include      *:8700/*
+// @include      *:10000/*
+// @include      *//leorchn.github.io/yt/
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
@@ -15,12 +17,20 @@ var vip,fun;
     recheck();
 })();
 function recheck(){ doEvents();
-    var a=ft('a');
-    for(var i=0,len=a.length;i<len;i++)
-        if(gfun(a[i].href)=='testtube'){
-            start();
-            return;
-        }
+    switch(location.port){
+        case'':if(document.readyState.toLowerCase()=='complete'){init();return;}else break;
+        case'8700':
+            var a=ft('a');
+            for(var i=0,len=a.length;i<len;i++)
+                if(gfun(a[i].href)=='testtube'){
+                    start();
+                    return;
+                }
+            break;
+        default:
+            if(document.title.includes(unescape('%u5927%u6cd5')))
+            location.href='//'+location.hostname+':8700';return;
+    }
     setTimeout(recheck,500);
 }
 function start(){
@@ -199,7 +209,7 @@ function funny(){
 }
 function funny_1_do(b){b.innerText='';b.parentNode.remove();}
 function funny_2_do(a){
-    var kwg=['%u8fd1%u5e73','%u6cfd%u6c11','%u6fa4%u6c11'];
+    var kwg=['%u8fd1%u5e73','%u6cfd%u6c11','%u6fa4%u6c11','%u6cd5%u8f6e','%u6cd5%u8f2a','%u5927%u6cd5','%u8feb%u5bb3'];
     for(var lv=0,llen=10,curnode=a;lv<llen;lv++)
         if(curnode.nodeName.toUpperCase()!="LI") curnode=curnode.parentNode;
         else for(var k in kwg)if(curnode.innerText.includes(unescape(kwg[k]))){
