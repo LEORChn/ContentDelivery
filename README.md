@@ -1,3 +1,3 @@
-# Fake-Youtube Helper
+# Content Delivery
 
-<a href="https://greasyfork.org/scripts/39210">Click here visit Greasy Fork.</a>
+Resource, Software etc...
